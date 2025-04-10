@@ -301,7 +301,7 @@
             order = getOrder();
             imageCount = parseInt(getProgress());
 
-            console.log("CONTINUING PID: " + pid + " " + order);
+            console.log("CONTINUING PID: " + pid + " " + order + " " + order.length);
         }
         doGame();
     }
@@ -470,18 +470,23 @@
 
         const emotions = ['happy', 'sad', 'neutral', 'angry', 'fear', 'surprise', 'disgust'];
         emotions.forEach(emotion => {
-            const label = document.createElement('label');
-            label.style.display = 'block';
-            label.style.margin = '0.3em auto';
-            label.style.cursor = 'pointer';
-
             const input = document.createElement('input');
-            input.type = 'radio';
-            input.name = 'emotion';
-            input.value = emotion;
+            const emotionId = `emotion-${emotion}`;
+            input.setAttribute('type', 'radio');
+            input.setAttribute('name', 'emotion');
+            input.setAttribute('value', emotion);
+            input.setAttribute('id', emotionId);
+            input.setAttribute('class', 'radio-input');
 
-            label.appendChild(input);
-            label.appendChild(document.createTextNode(' ' + emotion.charAt(0).toUpperCase() + emotion.slice(1)));
+            const label = document.createElement('label');
+            label.setAttribute('for', emotionId);
+            label.setAttribute('class', 'radio-label');
+            label.style.display = 'inline-block';
+            label.style.margin = '0.3em';
+            label.style.cursor = 'pointer';
+            label.textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
+
+            form.appendChild(input);
             form.appendChild(label);
         });
 

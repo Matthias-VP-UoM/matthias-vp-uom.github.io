@@ -624,6 +624,41 @@ option {
     z-index: 9999;
 }
 
+#emotion-form {
+    display: inline-flex;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+}
+
+.radio-input {
+    display: none;
+    border-style: solid;
+}
+
+.radio-label {
+    padding: 8px 14px;
+    font-size: 14px;
+    font-family: sans-serif;
+    color: #000000;
+    /*background: #009578;*/
+    cursor: pointer;
+}
+
+.radio-label:not(:last-of-type){
+    border-right: 1px solid #3b3b3b;
+}
+
+.radio-label:hover {
+    background-color: var(--dimselect);
+}
+
+.radio-input:checked + .radio-label {
+    background-color: var(--dim);
+    /*color: white;*/
+    font-weight: bold;
+}
+
 
 /* Mobile devices */
 @media screen and (max-aspect-ratio: 1/1) {
