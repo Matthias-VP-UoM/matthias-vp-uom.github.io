@@ -48,7 +48,7 @@ strong {
     justify-content: center;
     align-items: center;
     overflow-x: hidden;
-    overflow-y: hidden;
+    /*overflow-y: hidden;*/
     width: 100%;
 }
 
@@ -95,7 +95,7 @@ strong {
     height: auto;
     max-width: 50%;
     
-    overflow-y: hidden;
+    overflow-y: auto;
 
     margin-left: 1em;
     margin-right: 1em;
@@ -640,7 +640,7 @@ option {
         width: 80%;
         margin-top: 3em;
         color: var(--white);
-        font-size: 0.8em;
+        font-size: 0.6em;
         line-height: 1.5em;
     }
 
@@ -721,6 +721,29 @@ option {
     #ictlogomobile img {
         width: 15em;
         left: 0;
+    }
+
+}
+
+@media screen and (max-aspect-ratio: 1.25/1) {
+    #agreeterms {
+        width: 100%;
+        margin-top: 3em;
+        font-size: 0.8em;
+        margin: 0;
+        /*margin-top:0.5em;*/
+        line-height: 1em;
+    }
+    #disclaimertext{
+        width: auto;
+        margin-top: 4.5em;
+        color: var(--white);
+        font-size: 0.8em;
+        line-height: 1.5em;
+    }
+    #terms {
+        font-size: 0.8em;
+        justify-content: baseline;
     }
 
 }

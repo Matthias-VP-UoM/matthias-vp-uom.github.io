@@ -30,7 +30,7 @@
     <link id="icon" rel="icon" href="" types="image/icon type">
 
     <title>
-        AI in Media
+        Emotion Analysis Annotation Survey
     </title>
 
     <style>
@@ -47,8 +47,12 @@
         <a id="homelink"
             href="./">experiment</a></a>&nbsp•&nbsp<a id="homelink"
             href="./about/motivation">motivation</a></a>&nbsp•&nbsp<a id="homelink"
+            href="./about/terms">terms</a>
+        <!--<a id="homelink"
+            href="./">experiment</a></a>&nbsp•&nbsp<a id="homelink"
+            href="./about/motivation">motivation</a></a>&nbsp•&nbsp<a id="homelink"
             href="./about/terms">terms</a>&nbsp•&nbsp<a id="homelink" target="_blank"
-            href="https://docs.google.com/forms/d/e/1FAIpQLScc99LZatY1LNPVE39fgy27ZGm_tKGOtn1TCeV8HdmB_TH6Aw/viewform">Participate in future experiments!</a>
+            href="https://docs.google.com/forms/d/e/1FAIpQLScc99LZatY1LNPVE39fgy27ZGm_tKGOtn1TCeV8HdmB_TH6Aw/viewform">Participate in future experiments!</a>-->
         <a id="ictlogo" href="http://um.edu.mt/ict/ai" target="_blank"><img src="./ictlogo.png"></a>
     </p>
 
@@ -60,27 +64,33 @@
         <div id="imgcontainer">
             <!-- <img id="mainimage" src="" alt="">
             <h1 id="maintitle" src="" alt=""></h1> -->
-            <!-- Slider -->
-            <div id="slider">
-                <div class="marker-container">
-                    <p class="marker-text">Low Correlation</p>
-                    <p class="marker-text">High Correlation</p>
-                </div>
-                <div id="dot-container">
-                    <!-- Dots will be inserted here via JavaScript -->
-                </div>
-                <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
-            </div>
-            <small id="taskreminder">Low correlation is when the image and headline are unrelated.<br>High correlation is when the image and headline are highly related.</small>
+            <!-- Emotion Radio Buttons (will be added dynamically using JavaScript) -->
+            <!--<div id="emotion-selection" style="display: none; margin-top: 2em;">-->
+            <!--<div id="emotion-selection" style="display: none;">
+                <p><strong>Select the emotion that best matches the facial expression:</strong></p>
+                <form id="emotion-form">
+                    <label><input type="radio" name="emotion" value="happy"> Happy</label><br>
+                    <label><input type="radio" name="emotion" value="sad"> Sad</label><br>
+                    <label><input type="radio" name="emotion" value="neutral"> Neutral</label><br>
+                    <label><input type="radio" name="emotion" value="angry"> Angry</label><br>
+                    <label><input type="radio" name="emotion" value="fear"> Fear</label><br>
+                    <label><input type="radio" name="emotion" value="surprise"> Surprise</label><br>
+                    <label><input type="radio" name="emotion" value="disgust"> Disgust</label><br>
+                </form>
+                <button id="submit-emotion">Submit</button>
+            </div>-->
+
         </div>
 
         <div id="disclaimer" style="text-align:center;">
-            <p id="disclaimertext">This is experiment is about image-text similarity in news articles.
+            <p id="disclaimertext">This experiment is about how different people visualise and judge different facial expressions.
                 <br><br>
-                You will be shown the thumbnail and headline of a news article.
-                Your task is to rate the correlation between the text and the image.
+                You will be provided the image of a person's facial region of interest (ROI).
+                Your task is to select which emotion best suits the facial expression displayed by the person in the image.
                 <br>
-                The value you indicate on the slider will be recorded.
+                <!--You have to choose ONLY 1 out of 7 predefined emotion categories (i.e. happy, sad, neutral, angry, fear, surprise, disgust).
+                <br>-->
+                The answer that you choose will be recorded.
                 <br>
                 <!-- <small>
                     <b>Apple phones are currently not supported...<br> Please check in tomorrow when a fix will be available. Sorry for any inconvenience.</b><br>
@@ -144,7 +154,7 @@
             <p id="didyouknow"><strong><i>Did you know?</i></strong></p>
             <p id="randomfact"></p>
             <button id="nextimage">
-                <p id="nextimagetext">NEXT 5 ARTICLES</p>
+                <p id="nextimagetext">NEXT 5 FACES</p>
             </button>
             <p id="imagefraction"></p>
         </div>
@@ -156,246 +166,100 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
     import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js";
-    import { firebaseConfig } from "./upload.js";
+    //import { firebaseConfig } from "./upload.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDk-q9iM_NXkP1oC81JDOLCS4Ts9YsMCGU",
+        authDomain: "emotion-experiment-5f93a.firebaseapp.com",
+        projectId: "emotion-experiment-5f93a",
+        storageBucket: "emotion-experiment-5f93a.firebasestorage.app",
+        messagingSenderId: "467284939414",
+        appId: "1:467284939414:web:9a69ae0c7b31dd18f1e8b7"
+    };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const storage = getStorage(app, "gs://title-experiment-9f491.appspot.com");
+    const storage = getStorage(app, "gs://emotion-experiment-5f93a.firebasestorage.app");
 
     let pid;
     let order;
+    let imageCount = 0;
+    let imgNum;
+    let maxCount = 200;
+    let titles = [];
+    let facts = [];
+    let age, gender, ip_address = "";
 
-    async function generatePID(age, gender,ip_address) {
-        return new Promise((resolve, reject) => {
-            const storageRef = ref(storage, 'pids/');
-            let maxPID = 0;
-
-            listAll(storageRef)
-                .then((res) => {
-                    // List all directories in this directory, find the one with the largest number as a name
-                    res.prefixes.forEach((prefix) => {
-                        const number = parseInt(prefix.name);
-                        if (number > maxPID) {
-                            maxPID = number;
-                        }
-                    });
-
-                    const thisPID = maxPID + 1;
-                    // console.log("MAX PID: " + maxPID);
-
-                    const data = {
-                        age: age,
-                        gender: gender,
-                        ip: ip_address,
-                    };
-
-                    const file = new Blob([JSON.stringify(data, null, 2)], {
-                        type: 'application/json'
-                    });
-
-                    const fileName = 'info' + (thisPID) + '.json';
-                    const pidRef   = ref(storage, 'pids/' + (thisPID) + '/');
-                    const fileRef  = ref(pidRef, fileName);
-
-                    uploadBytes(fileRef, file)
-                        .then(() => {
-                            resolve(thisPID); // Resolve with the generated PID
-                        })
-                        .catch((error) => {
-                            reject(error); // Reject the promise if there is an error
-                        });
-                })
-                .catch((error) => {
-                    reject(error); // Reject the promise if there is an error listing directories
-                });
-        });
-    }
+    //const emotionForm = document.getElementById("emotion-form");
+    //const emotionSelection = document.getElementById("emotion-selection");
+    //const submitEmotionBtn = document.getElementById("submit-emotion");
 
     function setPID(pid) {
         document.cookie = `pid=${pid}; expires=Thu, 31 Dec 2099 23:59:59 GMT; path=/`;
     }
-
     function setProgress(progress) {
         document.cookie = `progress=${progress}; expires=Thu, 31 Dec 2099 23:59:59 GMT; path=/`;
     }
-
-    // Cookie to set 1. random set of images from either A or B and 2. the order of those images
     function setRandomisation(progress) {
         if (progress == 0) {
-            // group = Math.random() < 0.5 ? 'A' : 'B';
-            // Temporary switch to offset imbalance
-            // group = 'B';
-
-            // Generate list of number from 1 to 100 and shuffle
             let nums = Array.from({ length: 100 }, (_, i) => i + 1);
             order = nums.sort(() => Math.random() - 0.5);
-            // document.cookie = `group=${group}; expires=Thu, 31 Dec 2099 23:59:59 GMT; path=/`;
             document.cookie = `order=${order}; expires=Thu, 31 Dec 2099 23:59:59 GMT; path=/`;
         }
     }
-
     function getProgress() {
         const cookies = document.cookie.split('; ');
         for (const cookie of cookies) {
             const [name, value] = cookie.split('=');
-            if (name === 'progress') {
-                return value;
-            }
+            if (name === 'progress') return value;
         }
-        return null; // Return null if the progress cookie is not found
+        return null;
     }
-
     function getPID() {
         const cookies = document.cookie.split('; ');
         for (const cookie of cookies) {
             const [name, value] = cookie.split('=');
-            if (name === 'pid') {
-                return value;
-            }
+            if (name === 'pid') return value;
         }
-        return null; // Return null if the PID cookie is not found
+        return null;
     }
     function getOrder() {
         const cookies = document.cookie.split('; ');
         for (const cookie of cookies) {
             const [name, value] = cookie.split('=');
-            if (name === 'order') {
-                // console.log('Order cookie found: ' + value);
-                // Convert to list of integers
-                return value.split(',').map(Number);
-            }
+            if (name === 'order') return value.split(',').map(Number);
         }
-        return null; // Return null if the order cookie is not found
+        return null;
     }
 
-    let numDots      = 10;
-    let game         = document.getElementById("game");
-    let cross        = document.getElementById("cross");
-    let trail        = document.getElementById('trail');
-    let bottom       = document.getElementById("bottom");
-    let dogame       = document.getElementById("dogame");
-    let slider       = document.getElementById("slider");
-    let myRange      = document.getElementById("myRange");
-    let thankyou     = document.getElementById("thankyou");
-    let disclaimer   = document.getElementById("disclaimer");
-    let imgcontainer = document.getElementById("imgcontainer");
-    let dotContainer = document.getElementById("dot-container");
-    let originalHoverText = document.getElementById("hovertext").innerHTML;
+    async function generatePID(age, gender, ip_address) {
+        return new Promise((resolve, reject) => {
+            const storageRef = ref(storage, 'pids/');
+            let maxPID = 0;
 
-    //These will hold the image-title pair
-    let img;
-    let title;
+            listAll(storageRef).then(res => {
+                res.prefixes.forEach(prefix => {
+                    const number = parseInt(prefix.name);
+                    if (number > maxPID) maxPID = number;
+                });
 
-    let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    
-    if (!isSafari) {
-        myRange.style.opacity = 0;
-    } else {
+                const thisPID = maxPID + 1;
+                const data = { age, gender, ip: ip_address };
+                const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const fileName = 'info' + thisPID + '.json';
+                const fileRef = ref(storage, 'pids/' + thisPID + '/' + fileName);
 
-    }
-
-    // Create and position 10 dots
-    for (let i = 0; i < numDots; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot inactive';
-        dot.style.left = `${(i * 100) / (numDots - 1)}%`; // Evenly position dots
-        
-
-        if (isSafari) {
-            dot.style.opacity = 0;
-        }
-
-        dotContainer.appendChild(dot);
-    }
-
-
-    function updateDots(value) {
-        const dots = document.querySelectorAll('.dot');
-        console.log(value);
-
-        if (value == -1) {
-            dots.forEach((dot) => {
-                dot.classList.remove('active');
-                dot.classList.add('inactive');
-            });
-            return;
-        }
-
-        const index = Math.round(value / (100 / (numDots - 1)));
-        dots.forEach((dot, i) => {
-            if (i <= index) {
-                dot.classList.remove('inactive');
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-                dot.classList.add('inactive');
-            }
+                uploadBytes(fileRef, file).then(() => resolve(thisPID)).catch(reject);
+            }).catch(reject);
         });
     }
 
-    // MOBILE: Update dots based on slider input
-    myRange.addEventListener('input', function() {
-        updateDots(this.value);
-    });
-
-    // Handle mouse movement for precise dot activation
-    myRange.addEventListener('mousemove', function(e) {
-        const rect = myRange.getBoundingClientRect();
-        let offsetX = e.clientX - rect.left;
-        
-        const value = (offsetX / rect.width) * 100; // Calculate value based on mouse position
-        myRange.value = Math.min(Math.max(value, 0), 100);
-        updateDots(myRange.value);
-    });
-
-    myRange.addEventListener('mouseleave', function() {
-        // Check if mouse event are still active
-        if (myRange.style.pointerEvents == 'none') {
-            return;
-        }
-
-        updateDots(-1);
-    });
-
-    // Initialize dots on page load
-    updateDots(-1);
-
-    // Get titles from titles.txt
-    let titles = [];
-    fetch('./titles.txt')
-        .then(response => response.text())
-        .then(text => {
-            titles = text.split('\n');
-        });
-
-    let imageCount;
-    let imgNum;
-    let maxCount = 100;
-
-    imageCount = getProgress() == null ? 0 : parseInt(getProgress());
-    console.log(imageCount);
-
-    // Track mouse movements
-    let mouse = {
-        x: 0,
-        y: 0
-    };
-
-    // List of mouse positions
-    let sliderPosition = -1;
-
-    let age;
-    let gender;
-    let ip_address;
-
-    let formsubmit = document.getElementById("formsubmit");
-    let submittext = document.getElementById("submittext");
-
-    // Prevent default on formsubmit
-    formsubmit.addEventListener('click', (event) => {
-        event.preventDefault();
-        submitForm(event);
-    });
+    const game = document.getElementById("game");
+    const bottom = document.getElementById("bottom");
+    const thankyou = document.getElementById("thankyou");
+    const disclaimer = document.getElementById("disclaimer");
+    const imgcontainer = document.getElementById("imgcontainer");
+    const infosubmission = document.getElementById("infosubmission");
 
     start.style.pointerEvents = 'none';
     start.style.opacity = '0.3';
@@ -415,35 +279,39 @@
         }
     });
 
-    function handleSlider(event) {
-        event.preventDefault();
 
-        // Make the last white dot bigger, transform scale
-        let dots = document.querySelectorAll('.active');
-        dots[dots.length - 1].style.transform = "scale(1.5)";
+    async function initialiseGame() {
+        infosubmission.style.display = "none";
 
-        myRange.removeEventListener('click', handleSlider);
-        myRange.removeEventListener('touchend', handleSlider);
+        document.getElementById("infoform").removeEventListener('change', handleChange);
 
-        // Prevent all mouse events
-        myRange.style.pointerEvents = 'none';
-        
+        if (imageCount == 0 && getPID() == null) {
+            try {
+                setRandomisation(0);
+                const newPID = await generatePID(age, gender, ip_address);
+                setPID(newPID);
+                setProgress(imageCount);
+                pid = newPID;
+            } catch (error) {
+                console.error("Error generating PID:", error);
+                return;
+            }
+        } else {
+            pid = getPID();
+            order = getOrder();
+            imageCount = parseInt(getProgress());
 
-        sliderPosition = myRange.value;
-        imageCount++;
-        setProgress(imageCount);
-        endGame(sliderPosition);
+            console.log("CONTINUING PID: " + pid + " " + order);
+        }
+        doGame();
     }
 
-    // Function disclaimer
     function doDisclaimer() {
-        console.log("doDisclaimer()")
         disclaimer.style.display = "flex";
         thankyou.style.display = "none";
 
-
-        // Create button
-        let start = document.getElementById("start");
+        const start = document.getElementById("start");
+        const agree = document.getElementById("agree");
         let text = document.getElementById("disclaimertext");
         let startText = document.getElementById("starttext");
 
@@ -461,6 +329,9 @@
             startText.innerHTML = "CONTINUE";
         }
 
+        //start.style.pointerEvents = 'none';
+        //start.style.opacity = '0.3';
+
         // On button hover, change the background color fade into white
         start.addEventListener('mouseenter', () => {
             start.style.backgroundColor = "#181818";
@@ -473,7 +344,12 @@
             startText.style.color = "#181818";
         });
 
-        // Add a "click" event listener to the game div
+
+        agree.addEventListener('change', () => {
+            start.style.pointerEvents = agree.checked ? 'auto' : 'none';
+            start.style.opacity = agree.checked ? '1' : '0.3';
+        });
+
         start.addEventListener('click', () => {
             event.preventDefault();
 
@@ -481,27 +357,12 @@
             text.style.display = "none";
             start.style.display = "none";
 
-
-            // Start the game
             if (getPID() == null) {
                 showForm();
-            }
-            else {
+            } else {
                 initialiseGame();
             }
         });
-    }
-
-    function handleChange() {
-        age = document.getElementById("age").value;
-        gender = document.getElementById("gender").value;
-        if (age != "" && age >= 16 && age <= 100 && gender != "") {
-            formsubmit.style.pointerEvents = 'auto';
-            formsubmit.style.opacity = '1';
-        } else {
-            formsubmit.style.pointerEvents = 'none';
-            formsubmit.style.opacity = '0.3';
-        }
     }
 
     function showForm() {
@@ -526,421 +387,225 @@
         formsubmit.style.opacity = '0.3';
         formsubmit.style.pointerEvents = 'none';
 
-        infoform.addEventListener('change', handleChange);
-
         let infosubmission = document.getElementById("infosubmission");
+        infosubmission.style.display = "flex";
+
+        let disclaimer = document.getElementById("disclaimer");
         disclaimer.style.display = "none";
 
-        infosubmission.style.display = "flex";
-    }
+        document.getElementById("infoform").addEventListener('change', handleChange);
+        document.getElementById("formsubmit").addEventListener('click', (e) => {
+            e.preventDefault();
+            age = document.getElementById("age").value;
 
-    function submitForm(event) {
-        event.preventDefault();
-
-        age = document.getElementById("age").value;
-
-        // Check if values are empty
-        if (age == "") {
-            alert("Please enter your age.");
-            return;
-        }
-
-        initialiseGame();
-    }
-
-    async function initialiseGame() {
-        console.log("initialiseGame()")
-        infosubmission.style.display = "none";
-
-        infoform.removeEventListener('change', handleChange);
-
-
-        if (imageCount == 0 && getPID() == null) {
-            try {
-                // Generate a new PID and wait for the function to return before continuing
-                setRandomisation(imageCount);
-                const newPID = await generatePID(age, gender,ip_address);
-                console.log("PID:" + newPID);
-                setPID(newPID);
-                setProgress(imageCount);
-
-                console.log("NEW PID GENERATED: " + newPID + " " + order);
-
-                pid = newPID; // Update pid with the new PID
-            } catch (error) {
-                console.error("Error generating PID:", error);
-                // Handle error (e.g., show an error message to the user)
+            // Check if values are empty
+            if (age == "") {
+                alert("Please enter your age.");
                 return;
             }
-        } else {
-            pid = getPID();
-            order = getOrder();
-            imageCount = parseInt(getProgress());
 
-            console.log("CONTINUING PID: " + pid + " " + order);
-        }
-
-        // Continue with the game
-        doGame();
+            initialiseGame();
+        });
     }
 
-    // Function game
+    function handleChange() {
+        age = document.getElementById("age").value;
+        gender = document.getElementById("gender").value;
+        const formsubmit = document.getElementById("formsubmit");
+        formsubmit.style.pointerEvents = (age && gender) ? 'auto' : 'none';
+        formsubmit.style.opacity = (age && gender) ? '1' : '0.3';
+    }
+
     function doGame() {
-
-        if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)){
-            myRange.value = 50;
-        }
-
-
-        myRange.style.pointerEvents = 'auto';
-
-        console.log("doGame()")
-        // console.log("STARTING GAME " + imageCount);
-        disclaimer.style.display = "none";
-        dogame.style.display = "flex";
-        trail.style.display = "none";
-
-        thankyou.style.display = "none";
-
-        document.documentElement.style.overflowY = "hidden";
-
-        // Download image and cache
         imgNum = order[imageCount];
-        // img.src = './images/' + (imgNum) + '.jpg';
-        // img.style.display = "none";
-        // imgcontainer.style.display = "none";
-
-        // console.log(img, img.src, document.getElementById("mainimage").src);
-
-        // let dot = document.getElementById("dot");
-        // dot.style.display = "block";
-
-        // // Text under the dot to tell the user to hover over it
-        // let text = document.getElementById("hovertext");
-        // text.style.display = "block";
-
-        // dot.addEventListener('mouseenter', () => {
-        //     // Change the user's cursor to a crosshair
-        //     dot.style.cursor = "crosshair";
-        //     img.style.cursor = "crosshair";
-
-        //     let change2;
-        //     let change3;
-
-        //     let seconds1 = 900;
-        //     let seconds2 = 1800;
-        //     let seconds3 = 2700;
-
-        //     // let seconds1 = 200;
-        //     // let seconds2 = 300;
-        //     // let seconds3 = 400;
-
-        //     // Start a visual countdown 3 2 1...
-        //     text.innerHTML = "3";
-        //     change2 = setTimeout(() => {
-        //         text.innerHTML = "2";
-        //     }, seconds1); // 1000 milliseconds = 1 second
-
-        //     change3 = setTimeout(() => {
-        //         text.innerHTML = "1";
-        //     }, seconds2); // 2000 milliseconds = 2 seconds
-
-        //     // Set a timer to trigger the game start after 3 seconds.
-        //     const timer = setTimeout(() => startGame(), seconds3);
-
-        //     // Start fading out bottom
-        //     bottom.style.opacity = 1;
-        //     let opacity = 1;
-        //     let fadeOut = setInterval(() => {
-        //         if (opacity <= 0) {
-        //             clearInterval(fadeOut);
-        //             bottom.style.display = "none";
-        //         }
-        //         else {
-        //             opacity -= 0.1;
-        //             bottom.style.opacity = opacity;
-        //         }
-        //     }, 100);
-
-        //     // Add a "mouseleave" event listener to cancel the timer if the user moves the cursor away.
-        //     dot.addEventListener('mouseleave', () => {
-        //         // Cancel all timeouts
-        //         clearTimeout(change2);
-        //         clearTimeout(change3);
-        //         clearTimeout(timer);
-        //         text.innerHTML = originalHoverText; // Reset the text
-
-        //         // Reset the opacity of the bottom
-        //         bottom.style.opacity = 1;
-        //         clearInterval(fadeOut);
-        //         bottom.style.display = "block";
-
-        //     });
-        // });
-        // game.appendChild(dot);
-
-        startGame()
-
-        // Function startGame
-        function startGame() {
-            updateDots(-1);
-            
-            //Remove title and image, if any
-            if (typeof img !== 'undefined')
-                img.remove()
-            if (typeof title !== 'undefined')
-                title.remove()
-            
-            //Create elements for image and headline
-            //Order alternates to not add additional bias    
-            img = document.createElement('img')
-            img.setAttribute('id', 'mainimage');
-            title = document.createElement('h1')  
-            title.setAttribute('id', 'maintitle');
-            
-
-            if (isSafari) {
-                // img.style.backgroundColor = 'yellow';
-                img.style.height = 'auto';
-            }
-
-
-            let elements = [img,title]
-            for (let i = 0; i < elements.length; i++) {
-                imgcontainer.insertBefore(elements[(i+imageCount)%2], imgcontainer.firstChild);
-            }
-
-
-            console.log("startGame()")
-
-            bottom.style.display = "none";
-
-            disclaimer.style.display = "none";
-            dogame.style.display = "none";
-
-            // Flush trail div
-            // trail.innerHTML = "";
-
-            dot.style.display = "none";
-            // text.style.display = "none";
-
-            // Create a new image element
-            img.src = './images/' + (imgNum) + '.jpg';
-
-            // Set title, get from title.txt at line imgNum - 1
-            title.innerHTML = titles[imgNum - 1];
-
-            // Empty the mousePositions array
-            // mousePositions = [];
-
-            // Add a mousemove event listener to the game div
-            // img.addEventListener('mousemove', handleMouseMove);
-
-            // Add a mouse click event listener to the game div
-            // img.addEventListener('click', handleClick);
-
-            // img.addEventListener('mousemove', handleTrails);
-
-            // trail.style.display = "block";
-            img.style.display = "block";
-            imgcontainer.style.display = "flex";
-
-            // Fade imgcontainer in
-            imgcontainer.style.opacity = 0;
-            let opacity = 0;
-
-            let fadeIn = setInterval(() => {
-                if (opacity >= 1) {
-                    clearInterval(fadeIn);
-                }
-                else {
-                    opacity += 0.1;
-                    imgcontainer.style.opacity = opacity;
-                }
-            }, 50);
-
-            // Show the slider
-            slider.style.display = "block";
-
-            // Prevent clicks on slider
-            slider.style.cursor = 'default';
-
-            myRange.style.cursor = "pointer";
-            myRange.addEventListener('click', handleSlider);
-            myRange.addEventListener('touchend', handleSlider);
-
-            let dots = document.querySelectorAll('.dot');
-            dots.forEach((dot) => {
-                dot.style.transform = "scale(1)";
-                // dot.classList.remove('active');
-                // dot.classList.add('inactive');
-            });
-        }
+        startGame();
     }
 
-    // Function endGame
-    function endGame(sliderPosition) {
-        console.log("endGame()")
+    function startGame() {
+        console.log("startGame()");
 
-        const data = {
-            sliderPosition: sliderPosition
-        }
+        bottom.style.display = "none";
 
-        // console.log(data);
+        disclaimer.style.display = "none";
+        dogame.style.display = "none";
 
-        const file = new Blob([JSON.stringify(data, null, 2)], {
-            type: 'application/json'
+        // Clear previous image/title
+        imgcontainer.innerHTML = '';
+
+        // Create new image and title
+        const img = document.createElement('img');
+        img.setAttribute('id', 'mainimage');
+        //img.src = './images/' + imgNum + '.jpg';
+        img.src = './images_emo/' + imgNum + '.png';
+
+        //const title = document.createElement('h1');
+        //title.setAttribute('id', 'maintitle');
+        //title.innerHTML = titles[imgNum - 1];
+
+        // Alternate order of image and title
+        /*if (imageCount % 2 === 0) {
+            imgcontainer.appendChild(img);
+            //imgcontainer.appendChild(title);
+        } else {
+            //imgcontainer.appendChild(title);
+            imgcontainer.appendChild(img);
+        }*/
+
+        imgcontainer.appendChild(img);
+
+        // 🔥 Create emotion-selection form dynamically
+        const emotionDiv = document.createElement('div');
+        emotionDiv.setAttribute('id', 'emotion-selection');
+        emotionDiv.style.marginTop = '1em';
+        emotionDiv.style.marginBottom = '1em';
+        emotionDiv.style.textAlign = 'center';
+
+        const prompt = document.createElement('p');
+        prompt.innerHTML = '<strong>Select the emotion that best matches the facial expression:</strong>';
+        emotionDiv.appendChild(prompt);
+
+        const form = document.createElement('form');
+        form.setAttribute('id', 'emotion-form');
+        form.style.lineHeight = '1em';
+
+        const emotions = ['happy', 'sad', 'neutral', 'angry', 'fear', 'surprise', 'disgust'];
+        emotions.forEach(emotion => {
+            const label = document.createElement('label');
+            label.style.display = 'block';
+            label.style.margin = '0.3em auto';
+            label.style.cursor = 'pointer';
+
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'emotion';
+            input.value = emotion;
+
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(' ' + emotion.charAt(0).toUpperCase() + emotion.slice(1)));
+            form.appendChild(label);
         });
 
-        const jsonData = JSON.stringify(data, null, 2);
+        //form.style.marginBottom = '3em';
 
-        // Save in firebase storage
-        const storageRef = ref(storage, 'pids/' + pid + '/slider/' + imgNum + '/');
+        emotionDiv.appendChild(form);
 
-        // Check number of files already in firebase storage
-        listAll(storageRef)
-            .then((res) => {
-                const fileName = 'slider' + pid + '.json';
+        const submitBtn = document.createElement('button');
+        submitBtn.setAttribute('id', 'submit-emotion');
+        submitBtn.textContent = 'Submit';
+        submitBtn.style.display = 'block';
+        submitBtn.style.margin = '1.5em auto 0 auto';
+        submitBtn.style.padding = '0.5em 1em';
+        submitBtn.style.fontWeight = 'bold';
+        submitBtn.disabled = true;
 
-                // console.log(res.items.length);
-                // console.log(firebaseCounter);
+        emotionDiv.appendChild(submitBtn);
+        imgcontainer.appendChild(emotionDiv);
 
-                const fileRef = ref(storageRef, fileName);
+        // Show image container
+        img.style.display = "block";
+        imgcontainer.style.display = 'flex';
 
-                // Upload the file only once inside the listAll callback
-                return uploadBytes(fileRef, file);
-            })
-            .then((snapshot) => {
-                console.log('Uploaded a blob or file!');
-                console.log(snapshot.ref);
-                console.log(snapshot.ref.name);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+        imgcontainer.style.opacity = 0;
+        let opacity = 0;
 
-        // Wait for 2 seconds and call thank You
-        setTimeout(() => thankYou(), 500);
-
-    }
-
-    // Function thankYou
-    function thankYou() {
-        if (imageCount % 5 == 0) {
-            // Show a thank you message
-            bottom.style.display = "block";
-
-            thankyou.style.display = "flex";
-
-            game.style.pointerEvents = 'auto';
-
-            // Hide the cross
-            cross.style.display = "none";
-
-            // Display a thank you message to the user
-            let text = document.getElementById("thankyoutext");
-            text.style.display = "block";
-
-            // Display a random fact to the user
-            let randomfact = document.getElementById("randomfact");
-            randomfact.innerHTML = getRandomFact();
-
-
-            trail.style.display = "none";
-            img.style.display = "none";
-            imgcontainer.style.display = "none";
-
-
-            // Create button
-            let button = document.getElementById("nextimage");
-            let buttonText = document.getElementById("nextimagetext");
-            let imagefraction = document.getElementById("imagefraction");
-
-
-            if (imageCount < maxCount) {
-                button.style.display = "flex";
-                imagefraction.style.display = "block";
-
-                // Display number of images done over total number of images (maxcount)
-                imagefraction.innerHTML = (imageCount) + " / " + maxCount;
+        let fadeIn = setInterval(() => {
+            if (opacity >= 1) {
+                clearInterval(fadeIn);
             }
             else {
-                button.style.display = "none";
-
-                imagefraction.innerHTML = "TEST COMPLETE";
-                imagefraction.style.marginTop = "4em";
-                imagefraction.style.display = "block";
-
-                return;
+                opacity += 0.1;
+                imgcontainer.style.opacity = opacity;
             }
+        }, 50);
 
-            // Check if button already has an event listener, if yes continue
-            if (button.hasEventListener) {
-                return;
+        // Show emotion selection
+        const emotionSelection = document.getElementById('emotion-selection');
+        const submitEmotionBtn = document.getElementById('submit-emotion');
+        const emotionForm = document.getElementById('emotion-form');
+
+        /*if (!emotionSelection || !submitEmotionBtn || !emotionForm) {
+            console.error("One or more emotion elements are missing from the DOM.");
+            return;
+        }*/
+
+        console.log("emotionSelection:", emotionSelection);
+
+        emotionSelection.style.display = 'block';
+        submitEmotionBtn.disabled = true;
+        //emotionForm.style.marginBottom = '3em';
+
+        // Reset any selected radio
+        emotionForm.querySelectorAll('input[name="emotion"]').forEach(radio => {
+            radio.checked = false;
+            radio.addEventListener('change', () => {
+                submitEmotionBtn.disabled = false;
+            });
+        });
+
+        submitEmotionBtn.onclick = () => {
+            const selected = emotionForm.querySelector('input[name="emotion"]:checked');
+            if (selected) {
+                //emotionSelection.style.display = 'none';
+                imageCount++;
+                setProgress(imageCount);
+                endGame(selected.value);
             }
+        };
+    }
 
-            // On button hover, change the background color fade into white
-            button.addEventListener('mouseenter', () => {
-                button.style.backgroundColor = "#181818";
-                button.style.color = "#dfdfdf";
-            });
 
-            // On button hover, change the background color fade into white
-            button.addEventListener('mouseleave', () => {
-                button.style.backgroundColor = "#dfdfdf";
-                button.style.color = "#181818";
-            });
+    function endGame(selectedEmotion) {
+        const data = { selectedEmotion };
+        const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const storageRef = ref(storage, 'pids/' + pid + '/responses/' + imgNum + '/');
+        const fileRef = ref(storageRef, 'emotion' + pid + '.json');
 
-            // Add a "click" event listener to the game div
-            button.addEventListener('click', () => {
+        uploadBytes(fileRef, file).then(() => {
+            setTimeout(thankYou, 500);
+        }).catch(console.error);
+    }
+
+    function thankYou() {
+        if (imageCount % 5 === 0) {
+            thankyou.style.display = "flex";
+            const imagefraction = document.getElementById("imagefraction");
+            imagefraction.innerHTML = imageCount >= maxCount ? "TEST COMPLETE" : `${imageCount} / ${maxCount}`;
+            imagefraction.style.display = "block";
+
+            const nextButton = document.getElementById("nextimage");
+            nextButton.style.display = imageCount < maxCount ? "flex" : "none";
+            nextButton.onclick = () => {
                 event.preventDefault();
-
-                // Remove the text
-                text.style.display = "none";
-                button.style.display = "none";
-                imagefraction.style.display = "none";
-
-                // Start the game
+                thankyou.style.display = "none";
                 doGame();
-            });
-        }
-        else {
+            };
+
+            const fact = getRandomFact();
+            document.getElementById("randomfact").textContent = fact;
+            //img.style.display = "none";
+            imgcontainer.style.display = "none";
+        } else {
             doGame();
         }
     }
 
     function getRandomFact() {
-        let fact = "";
-
-        let random = Math.floor(Math.random() * facts.length);
-
-        fact = facts[random];
-
-        return fact;
+        const random = Math.floor(Math.random() * facts.length);
+        return facts[random];
     }
 
+    // Fetch titles and facts
+    fetch('./titles.txt').then(res => res.text()).then(text => titles = text.trim().split('\n'));
+    fetch('./facts.txt').then(res => res.text()).then(text => facts = text.trim().split('\n'));
 
-    let facts;
-
-    // Get facts from facts.txt
-    fetch('./facts.txt')
-        .then(response => response.text())
-        .then(text => {
-            facts = text.split('\n');
-        });
-    
-    //Uncomment to enable ip_address storing
+    // Get IP address (optional)
     fetch('https://api.ipify.org?format=json')
         .then(response => response.json())
-        .then(data => {
-            // ip_address = data.ip
-            ip_address = ""
-        })
-        .catch(error => {
-            console.log("[ERROR] Cannot retrieve IP")
-            ip_address = ""
-    });
+        .then(data => ip_address = data.ip)
+        .catch(() => ip_address = "");
 
+    imageCount = getProgress() == null ? 0 : parseInt(getProgress());
+    order = getOrder();
     doDisclaimer();
 
 </script>
