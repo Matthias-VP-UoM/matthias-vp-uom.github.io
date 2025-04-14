@@ -470,6 +470,11 @@
         form.style.lineHeight = '1em';
 
         const emotions = ['happy', 'sad', 'neutral', 'angry', 'fear', 'surprise', 'disgust'];
+
+        let colours = {'angry': '#ff0000', 'happy': '#00ff00', 'sad': '#0000ff', 'fear': '#ff00ff', 'disgust': '#ffff00', 'surprise': '#f4a460', 'neutral': '#ffffff'};
+        let coloursHover = {'angry': '#DC143C', 'happy': '#2E8B57', 'sad': '#0000cd', 'fear': '#a020f0', 'disgust': '#F0E68C', 'surprise': '#DAA520', 'neutral': '#D3D3D3'};
+        let coloursSelect = {'angry': '#DC143C', 'happy': '#2E8B57', 'sad': '#0000cd', 'fear': '#a020f0', 'disgust': '#F0E68C', 'surprise': '#DAA520', 'neutral': '#D3D3D3'};
+
         emotions.forEach(emotion => {
             const input = document.createElement('input');
             const emotionId = `emotion-${emotion}`;
@@ -485,7 +490,18 @@
             label.style.display = 'inline-block';
             //label.style.margin = '0.3em';
             label.style.cursor = 'pointer';
+            label.style.backgroundColor = colours[emotion];
             label.textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
+
+            // Add hover style on mouseover
+            label.addEventListener('mouseover', () => {
+                label.style.backgroundColor = coloursHover[emotion];
+            });
+
+            // Revert style on mouseout
+            label.addEventListener('mouseout', () => {
+                label.style.backgroundColor = colours[emotion];
+            });
 
             form.appendChild(input);
             form.appendChild(label);
