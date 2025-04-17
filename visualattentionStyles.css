@@ -624,11 +624,19 @@ option {
     z-index: 9999;
 }
 
+#emotion-selection {
+    white-space: normal; /* allow wrapping */
+}
+
 #emotion-form {
     display: inline-flex;
+    white-space: nowrap;          /* prevent wrapping */
+    justify-content: center;
     overflow: hidden;
     border-radius: 15px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+    /*max-width: 90vw;  allows it to scale down on small screens */
+    transform-origin: center;   /* scale from top-left */
 }
 
 .radio-input {
@@ -637,12 +645,13 @@ option {
 }
 
 .radio-label {
-    padding: 14px 20px;
+    padding: 1em 1.5em; /* relative units instead of px */
     font-size: 14px;
     font-family: sans-serif;
     color: #000000;
-    /*background: #009578;*/
+    white-space: nowrap; /* prevent breaking text on small screens */
     cursor: pointer;
+    flex: 0 1 auto;
 }
 
 .radio-label:not(:last-of-type){
@@ -758,9 +767,27 @@ option {
         left: 0;
     }
 
+    /*.radio-label {
+        padding: 0.8em 1.2em;
+        font-size: 0.9rem;
+    }
+
+    .radio-label:not(:last-of-type){
+        border: none;
+    }*/
+
+    /*#emotion-form {
+        transform: scale(0.75);
+        justify-content: center;
+    }
+
+    #emotion-selection strong {
+        font-size: 0.8rem;
+    }*/
+
 }
 
-@media screen and (max-aspect-ratio: 1.25/1) {
+@media screen and (max-aspect-ratio: 0.75/1) {
     #agreeterms {
         width: 100%;
         margin-top: 3em;
@@ -779,6 +806,49 @@ option {
     #terms {
         font-size: 0.8em;
         justify-content: baseline;
+    }
+
+    /*.radio-label {
+        padding: 0.6em 1em;
+        font-size: 0.8rem;
+    }
+
+    .radio-label:not(:last-of-type){
+        border: none;
+    }*/
+
+}
+
+@media screen and (max-width: 520px) {
+    #emotion-form {
+        transform: scale(0.75);
+        justify-content: center;
+    }
+
+    #emotion-selection strong {
+        font-size: 0.8rem;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    #emotion-form {
+        transform: scale(0.65);
+        justify-content: center;
+    }
+
+    #emotion-selection strong {
+        font-size: 0.7rem;
+    }
+}
+
+@media screen and (max-width: 350px) {
+    #emotion-form {
+        transform: scale(0.55);
+        justify-content: center;
+    }
+
+    #emotion-selection strong {
+        font-size: 0.6rem;
     }
 
 }
