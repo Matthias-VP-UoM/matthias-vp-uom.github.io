@@ -847,10 +847,6 @@ option {
         justify-content: center;
     }
 
-    #emotion-selection strong {
-        font-size: 0.6rem;
-    }
-
 }
 
 /* @media screen and (-webkit-touch-callout: none) {
