@@ -130,6 +130,61 @@
                         <option value="RatherNotSay">Rather not say</option>
                     </select>
                 </span>
+                <br>
+                <span>
+                    <select id="nationality" name="nationality" required>
+                        <option value="" disabled selected hidden>Nationality</option>
+                        <option value="Albania">Albania</option>
+                        <option value="Andorra">Andorra</option>
+                        <option value="Armenia">Armenia</option>
+                        <option value="Austria">Austria</option>
+                        <option value="Azerbaijan">Azerbaijan</option>
+                        <option value="Belarus">Belarus</option>
+                        <option value="Belgium">Belgium</option>
+                        <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
+                        <option value="Bulgaria">Bulgaria</option>
+                        <option value="Croatia">Croatia</option>
+                        <option value="Cyprus">Cyprus</option>
+                        <option value="Czech Republic">Czech Republic</option>
+                        <option value="Denmark">Denmark</option>
+                        <option value="Estonia">Estonia</option>
+                        <option value="Finland">Finland</option>
+                        <option value="France">France</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Germany">Germany</option>
+                        <option value="Greece">Greece</option>
+                        <option value="Hungary">Hungary</option>
+                        <option value="Iceland">Iceland</option>
+                        <option value="Ireland">Ireland</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Kosovo">Kosovo</option>
+                        <option value="Latvia">Latvia</option>
+                        <option value="Liechtenstein">Liechtenstein</option>
+                        <option value="Lithuania">Lithuania</option>
+                        <option value="Luxembourg">Luxembourg</option>
+                        <option value="Macedonia">Macedonia</option>
+                        <option value="Malta">Malta</option>
+                        <option value="Moldova">Moldova</option>
+                        <option value="Monaco">Monaco</option>
+                        <option value="Montenegro">Montenegro</option>
+                        <option value="Netherlands">Netherlands</option>
+                        <option value="Norway">Norway</option>
+                        <option value="Poland">Poland</option>
+                        <option value="Portugal">Portugal</option>
+                        <option value="Romania">Romania</option>
+                        <option value="Russia">Russia</option>
+                        <option value="San Marino">San Marino</option>
+                        <option value="Serbia">Serbia</option>
+                        <option value="Slovakia">Slovakia</option>
+                        <option value="Slovenia">Slovenia</option>
+                        <option value="Spain">Spain</option>
+                        <option value="Sweden">Sweden</option>
+                        <option value="Switzerland">Switzerland</option>
+                        <option value="Ukraine">Ukraine</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </span>
 
                 <div class="buttonarea">
                     <button id="formsubmit">
@@ -188,7 +243,7 @@
     let maxCount = 125;
     let titles = [];
     let facts = [];
-    let age, gender, ip_address = "";
+    let age, gender, nationality, ip_address = "";
 
     //const emotionForm = document.getElementById("emotion-form");
     //const emotionSelection = document.getElementById("emotion-selection");
@@ -232,7 +287,7 @@
         return null;
     }
 
-    async function generatePID(age, gender, ip_address) {
+    async function generatePID(age, gender, nationality, ip_address) {
         return new Promise((resolve, reject) => {
             const storageRef = ref(storage, 'pids/');
             let maxPID = 0;
@@ -244,7 +299,7 @@
                 });
 
                 const thisPID = maxPID + 1;
-                const data = { age, gender, ip: ip_address };
+                const data = { age, gender, nationality, ip: ip_address };
                 const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const fileName = 'info' + thisPID + '.json';
                 const fileRef = ref(storage, 'pids/' + thisPID + '/' + fileName);
@@ -288,7 +343,7 @@
         if (imageCount == 0 && getPID() == null) {
             try {
                 setRandomisation(0);
-                const newPID = await generatePID(age, gender, ip_address);
+                const newPID = await generatePID(age, gender, nationality, ip_address);
                 setPID(newPID);
                 setProgress(imageCount);
                 pid = newPID;
@@ -373,6 +428,12 @@
             genderBox.style.color = "#181818";
         });
 
+        let nationBox = document.getElementById("nationality");
+
+        nationBox.addEventListener('change', () => {
+            nationBox.style.color = "#181818";
+        });
+
         // On button hover, change the background color fade into white
         formsubmit.addEventListener('mouseenter', () => {
             formsubmit.style.backgroundColor = "#181818";
@@ -412,9 +473,10 @@
     function handleChange() {
         age = document.getElementById("age").value;
         gender = document.getElementById("gender").value;
+        nationality = document.getElementById("nationality").value;
         const formsubmit = document.getElementById("formsubmit");
-        formsubmit.style.pointerEvents = (age && gender) ? 'auto' : 'none';
-        formsubmit.style.opacity = (age && gender) ? '1' : '0.3';
+        formsubmit.style.pointerEvents = (age && gender && nationality) ? 'auto' : 'none';
+        formsubmit.style.opacity = (age && gender && nationality) ? '1' : '0.3';
     }
 
     function doGame() {
